@@ -2,6 +2,8 @@ name: CI
 on:
   pull_request:
     branches: [ main ]
+  push:
+    branches: [ bp-seed ]
 
 concurrency:
   group: ci-${{ github.ref }}
