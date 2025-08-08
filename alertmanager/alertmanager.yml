@@ -1,0 +1,12 @@
+route:
+  receiver: echo
+  group_by: [alertname]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 3h
+
+receivers:
+- name: echo
+  webhook_configs:
+  - url: http://am-echo:8080/
+    send_resolved: true

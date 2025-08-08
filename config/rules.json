@@ -1,0 +1,1 @@
+{ "forbidden": ["shutdown", "rm -rf /", "DROP TABLE"] }

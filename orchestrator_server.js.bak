@@ -1,0 +1,38 @@
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import fs from 'fs';
+import { Pool } from 'pg';
+import client from 'prom-client';
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+// Load guard rules
+const cfg = JSON.parse(fs.readFileSync('./config/rules.json'));
+const FORBID = cfg.forbidden;
+
+// Postgres pool
+const pool = new Pool({ connectionString: process.env.DATABASE_URL || 'postgres://orchestrator:secret@db:5432/orchestrator_db' });
+
+// Prometheus metric
+const cmdCounter = new client.Counter({
+  name: 'orchestrator_commands_total',
+  help: 'Total commands received',
+});
+
+// /metrics endpoint
+app.get('/metrics', (req, res) => res.send(client.register.metrics()));
+
+io.on('connection', socket => {
+  socket.on('orchestrator:command', async ({ cmd }) => {
+    const ts = new Date().toISOString();
+fs.appendFileSync('logs/commands.log', `${ts} COMMAND: ${cmd}\n`);
+    cmdCounter.inc();
+    await pool.query('INSERT INTO commands(command,timestamp) VALUES($1,$2)', [cmd, ts]);
+    console.log('➡️', ts, cmd);
+  });
+});
+
+server.listen(4000, () => console.log('🚀 on https://localhost:4000'));

@@ -1,0 +1,20 @@
+route:
+  receiver: echo
+  group_by: [alertname]
+  group_wait: 0s
+  group_interval: 5s
+  repeat_interval: 1h
+  routes:
+    - receiver: lockdown
+      matchers:
+        - alertname="LoyaltyTripwire"
+
+receivers:
+  - name: echo
+    webhook_configs:
+      - send_resolved: true
+        url: http://am-echo:8080/
+  - name: lockdown
+    webhook_configs:
+      - send_resolved: true
+        url: http://am-lockdown:8090/lockdown

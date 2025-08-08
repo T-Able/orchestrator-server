@@ -1,0 +1,11 @@
+{
+  auto_https off
+}
+:80 {
+  reverse_proxy /orchestrator/* http://orchestrator:4000
+  reverse_proxy /beta/*         http://warp-beta:4000
+  reverse_proxy /fusion/*       http://fusion-omega:4000
+
+  reverse_proxy /metrics        http://orchestrator:4000/metrics
+  reverse_proxy /health         http://orchestrator:4000/health
+}

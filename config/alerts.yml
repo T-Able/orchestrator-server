@@ -1,0 +1,11 @@
+groups:
+- name: sim-metrics.rules
+  rules:
+  - alert: SimulationIssues
+    expr: simulation_status == 1
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Simulation issues detected"
+      description: "simulation_status=1 on {{ $labels.instance }} (errors seen in last run)"

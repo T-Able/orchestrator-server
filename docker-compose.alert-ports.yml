@@ -1,0 +1,4 @@
+services:
+  alertmanager:
+    ports:
+      - "9093:9093"

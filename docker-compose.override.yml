@@ -1,0 +1,32 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - type: bind
+        source: ./prometheus
+        target: /etc/prometheus
+        read_only: true
+        bind: { create_host_path: true }
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml"]
+    ports:
+      - "9093:9093"
+    volumes:
+      - type: bind
+        source: ./config
+        target: /etc/alertmanager
+        read_only: true
+        bind: { create_host_path: true }
+
+  am-lockdown:
+    build: ./am-lockdown
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./config
+        target: /shared

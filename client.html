@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Orchestrator Test</title></head>
+<body>
+  <textarea id="log" rows="10" cols="50" readonly></textarea><br>
+  <input id="cmd" placeholder="ethics check" size="30"><button id="send">Send</button>
+
+  <!-- 1) Load the Socket.IO client that your server provides -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- 2) Your client logic -->
+  <script>
+    console.log('🔌 client.html loaded');
+    const socket = io();  // connects back to the same host & port
+    const log = document.getElementById('log');
+    const cmd = document.getElementById('cmd');
+
+    socket.on('connect', () => {
+      log.value += '[Socket.IO] connected as ' + socket.id + '\n';
+      log.value += '[Orchestrator] Connection established.\n';
+    });
+
+    socket.on('log', msg => {
+      log.value += msg + '\n';
+    });
+
+    document.getElementById('send').onclick = () => {
+      const text = cmd.value.trim();
+      if (!text) return;
+      socket.emit('orchestrator:command', { cmd: text });
+      cmd.value = '';
+    };
+  </script>
+</body>
+</html>

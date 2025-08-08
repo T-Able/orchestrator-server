@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: orchestrator
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: orchestrator_db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  orchestrator:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgres://orchestrator:secret@db:5432/orchestrator_db
+      SIM_RUNS: 500000
+      SIM_STEPS: 25
+    depends_on:
+      - db
+
+  warpdrive-beta:
+    build: .
+    command: ["sh", "-c", "./beta-watch.sh"]
+    environment:
+      SIM_RUNS: 500000
+      SIM_STEPS: 25
+    depends_on:
+      - orchestrator
+
+  fusion-drive:
+    build: .
+    command: ["node", "fusion.js"]
+    depends_on:
+      - orchestrator
+      - warpdrive-beta
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+volumes:
+  db-data:
+  caddy_data:

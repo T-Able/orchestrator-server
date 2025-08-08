@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  orchestrator:
+    build: .
+    image: orchestrator-server:latest
+    environment:
+      ROLE: orchestrator
+    ports:
+      - "4000:4000"
+  warp-beta:
+    image: orchestrator-server:latest
+    environment:
+      ROLE: beta
+    ports:
+      - "4002:4000"
+    depends_on: [orchestrator]
+  fusion-omega:
+    image: orchestrator-server:latest
+    environment:
+      ROLE: fusion
+    ports:
+      - "4003:4000"
+    depends_on: [orchestrator]
+  caddy:
+    image: caddy:2
+    depends_on: [orchestrator, warp-beta, fusion-omega]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+  prometheus:
+    volumes: []
+volumes:
+  caddy_data:

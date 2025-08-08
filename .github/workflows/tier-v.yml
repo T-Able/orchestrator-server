@@ -1,0 +1,19 @@
+name: Tier-V Gate
+on:
+  push:
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable + Verify Tier-V
+        run: |
+          printf 'services:\n  alertmanager:\n    ports:\n      - "9093:9093"\n' > docker-compose.ci-ports.yml
+          export COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose.ci-ports.yml
+          bash scripts/tier-v-enable.sh
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          docker compose logs --tail=200 alertmanager am-lockdown prometheus || true
+          ls -l config || true
