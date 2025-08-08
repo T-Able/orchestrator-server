@@ -1,0 +1,35 @@
+name: Security
+on:
+  workflow_run:
+    workflows: ["Release (build & push images)"]
+    types: [completed]
+
+jobs:
+  trivy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Scan repo (IaC/deps)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-repo.sarif
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-repo.sarif
+      - name: Scan image (latest)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}:latest
+          format: sarif
+          output: trivy-image.sarif
+      - name: Upload image SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image.sarif
