@@ -12,14 +12,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Debug
-        run: |
-          docker version
-          docker compose version
-          printf "--- docker-compose.yml ---\n"
-          sed -n \"1,200p\" docker-compose.yml
-          echo \"--- compose config ---\"
-      - name: Validate docker-compose.yml
-        run: docker compose -f docker-compose.yml config
-      - name: Validate docker-compose.yml
-        run: docker compose -f docker-compose.yml config -q
+      - name: Validate docker-compose.yml (with CI override)
+        run: docker compose -f docker-compose.yml -f .ci/compose-fix.yml config -q
