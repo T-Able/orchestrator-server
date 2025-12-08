@@ -5,7 +5,7 @@
   "main": "orchestrator_server.js",
   "scripts": { "start": "node orchestrator_server.js" },
   "dependencies": {
-    "express": "^4.21.2",
+    "express": "^5.2.1",
     "socket.io": "^4.8.1",
     "prom-client": "^15.1.3"
   }
